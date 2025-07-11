@@ -1,23 +1,25 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
-const verifyToken = (req,res,next)=>{
-    const authHeaders = req.headers['authorization'];
-    if(!authHeaders){
-        return res.status(402).json({"message":"Authorization headers missing"});
-    }
-    const token = authHeaders.split(' ')[1];
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
 
-    if(!token){
-        return res.status(402).json({"message":"Invalid token"});
-    }
+  if (!authHeader) {
+    return res.status(401).json({ message: "Authorization header missing" });
+  }
 
-    try {
-        const decoded  = jwt.verify(token,'secert999');
-        req.user = decoded;
-        next();
-    } catch (error) {
-        return res.status(402).json({"message":"No token is provided"});
-    }
+  const token = authHeader.split(' ')[1]; // Expected format: "Bearer <token>"
 
-}
+  if (!token) {
+    return res.status(401).json({ message: "Token missing from header" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'secret999'); 
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: "Invalid or expired token" });
+  }
+};
+
 export default verifyToken;
