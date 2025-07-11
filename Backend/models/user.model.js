@@ -1,34 +1,40 @@
-import mongoose, { mongo } from "mongoose";
-import bcrypt, { genSalt } from 'bcrypt';
+import mongoose from "mongoose";
+import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
-    email : {
-        type:String,
-        required:true,
-        unique : true
+
+    firstName: {
+        type: String,
+        required: true
     },
-    password:{
-        type:String,
-        required:true,
+    lastName: {
+        type: String,
+    },
+    mobile: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    password: {
+        type: String,
+        required: true
     }
-},{timestamps:true});
+}, { timestamps: true });
 
-userSchema.methods.checkPassword = function(enteredPassword){
-    if(enteredPassword === this.password){
-        return true;
-    }
-    return false;
-}
-
-userSchema.pre('save',async function(next){
-    if(!this.isModified('password')) return next();
-
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
     try {
-        const saltRounds = await genSalt(10);
-        this.password = await bcrypt.hash(this.password,saltRounds)
+        const saltRounds = 10;
+        this.password = await bcrypt.hash(this.password, saltRounds);
         next();
     } catch (error) {
-        console.log("Error in hashing the password",error);
+        console.error("Error in hashing password:", error);
+        next(error);
     }
-})
-export default mongoose.model('User',userSchema)
+});
+
+export default mongoose.model('User', userSchema);
